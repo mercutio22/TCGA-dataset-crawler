@@ -6,9 +6,10 @@
 from scrapy.item import Item, Field
 
 class DataSetItem(Item):
-    name = Field()
-    md5 = Field()
-    url = Field()
-    level = Field()
+    origin = Field()
+    sample = Field()
+    platform = Field()
+    batch = Field()
     version = Field()
+    url = Field()
 
