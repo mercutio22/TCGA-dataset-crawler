@@ -18,9 +18,12 @@ class GetAndVerify(object):
         """ Downloads file and compares md5sum """
         
         url = item['url']
+        if not os.path.exists('datafiles/'):
+            os.makedirs('datafiles/')
         outfile= os.path.join('datafiles', os.path.basename(url))
         #subprocess.call(['wget', '-O', os.path.join('datafiles/', outfile), url,
         #])
+        #aria2 is faster then wget, so we do that:
         subprocess.call(['aria2c', url, '-o', outfile, '-x', '5', '-j', '5'])
         md5file = outfile + '.md5'
         md5url = url + '.md5'
