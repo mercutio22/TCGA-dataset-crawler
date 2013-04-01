@@ -28,13 +28,25 @@ class TcgascrapperSpider(BaseSpider):
             \.(?P<version>\d+\.\d+)          # dot, version number              
             \.tar\.gz$""",                                                      
             re.VERBOSE #allows commenting a regular expression                  
-            )                                                                   
+            )
         for link in links:                                                      
             match = pattern.match(link.extract())                               
             if match:                                                           
                 #get all the info                                               
                 datum = DataSetItem(**match.groupdict())                        
                 #adding the the url for future reference                        
-                datum['url'] = response.url + link.extract()                              
+                datum['url'] = response.url + link.extract()
                 items.append(datum)
+        
+        # order by batch and keep only most updated version items:
+        items.sort(key=lambda item: 
+                ( float(item['batch']), -float(item['version']) ) 
+            )
+        batches = set()
+        # iterate a 'items' copy and remove the obsolete items for each batch
+        for item in items[:]:  # 
+            if item['batch'] in batches:
+                items.remove(item)
+            else:
+                batches.add(item['batch'])
         return items   
