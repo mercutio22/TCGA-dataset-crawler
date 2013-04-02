@@ -31,7 +31,8 @@ class GetAndVerify(object):
         subprocess.call(['aria2c', url, '-o', outfile, '-x', '5', '-j', '5'])
         md5file = outfile + '.md5'
         md5url = url + '.md5'
-        subprocess.call(['wget', '-O', md5url, md5url])
+        a = subprocess.Popen(['wget', '-O', md5url, md5url])
+        a.wait()
         #subprocess.call(['md5sum', '-c', md5])
         calculatedMD5 = md5sum(outfile)
         with open(md5file) as md5info:
