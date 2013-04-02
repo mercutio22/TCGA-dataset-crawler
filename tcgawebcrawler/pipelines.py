@@ -8,9 +8,13 @@ import hashlib
 
 def md5sum(filename):
     m = hashlib.md5()
-    with open(filename) as data:
-        m.update(data.read())
-        return m.hexdigest()
+    with open(filename, 'rb') as data:
+        while True:
+            block = data.read(8192)
+            if not block:
+                break
+            m.update(data.read())
+    return m.hexdigest()
 
 class GetAndVerify(object):
 
