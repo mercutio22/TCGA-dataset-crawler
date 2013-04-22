@@ -10,8 +10,9 @@ sapply(TARs, decompress)
 
 build.batch.dataframe = function() {
     #setwd('../tcgawebcrawler/datafiles')
-    pattern = '*TCGA-([0-9A-Z]{2})-([0-9A-Z]{4})-(0[0-9]|[1][0-9])([A-Z])-(0[0-9]|[1-9][0-9])([DGHRTWX])-([0-9A-Z]{4})-(\\d{2})*'
+    pattern = '.*TCGA-([0-9A-Z]{2})-([0-9A-Z]{4})-(0[0-9]|[1][0-9])([A-Z])-(0[0-9]|[1-9][0-9])([DGHRTWX])-([0-9A-Z]{4})-(\\d{2}).*'
     #TODO: get each matching group into a manifest file
+    #i.e.: r = str_match(file, pattern); institution = r[2]; pcode =r[5]
     files = (list.files(pattern=pattern, full.names=TRUE, recursive=TRUE) )
     merged = data.frame() #each patient sample's methylation beta value will be added to this
     for (file in files) {
@@ -37,9 +38,3 @@ build.batch.dataframe = function() {
 #construir um manifesto com id do paciente, status tumoral, níveis, batch
 #ver wiki do tcga barcode
 #calcular o desvio padrão dos beta values(adicionar no final)
-
-
-
-
-
-
