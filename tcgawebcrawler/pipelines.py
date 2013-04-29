@@ -3,7 +3,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES settingh# See: http://doc.scrapy.org/topics/item-pipeline.html
 
 import subprocess
-import os.path
+import os
 import hashlib
 
 def md5sum(filename):
@@ -13,7 +13,7 @@ def md5sum(filename):
             block = data.read(8192)
             if not block:
                 break
-            m.update(data.read())
+            m.update(block)
     return m.hexdigest()
 
 class GetAndVerify(object):
@@ -38,6 +38,7 @@ class GetAndVerify(object):
         calculatedMD5 = md5sum(outfile)
         with open(md5file) as md5info:
             actualMD5, filename = md5info.readline().split()
-        if actualMD5 != calculatedMD5:
-            self.process_item(item, spider)   
+            if actualMD5 != calculatedMD5:
+                os.remove(outfile)
+                self.process_item(item, spider)   
         return item

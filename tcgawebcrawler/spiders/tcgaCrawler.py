@@ -49,4 +49,5 @@ class TcgascrapperSpider(BaseSpider):
                 items.remove(item)
             else:
                 batches.add(item['batch'])
-        return items   
+        for item in items:
+            yield item
