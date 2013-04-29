@@ -28,10 +28,11 @@ class GetAndVerify(object):
         #subprocess.call(['wget', '-O', os.path.join('datafiles/', outfile), url,
         #])
         #aria2 is faster then wget, so we do that:
-        subprocess.call(['aria2c', url, '-o', outfile, '-x', '5', '-j', '5'])
+        a = subprocess.Popen(['aria2c', url, '-o', outfile, '-x', '5', '-j', '5'])
+        a.wait()
         md5file = outfile + '.md5'
         md5url = url + '.md5'
-        a = subprocess.Popen(['wget', '-O', md5url, md5url])
+        a = subprocess.Popen(['wget', '-O', md5file, md5url])
         a.wait()
         #subprocess.call(['md5sum', '-c', md5])
         calculatedMD5 = md5sum(outfile)
