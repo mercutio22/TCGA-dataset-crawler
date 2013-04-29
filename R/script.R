@@ -6,8 +6,8 @@ library(stringr)
 
 #use gzfile instead?
 setwd('../tcgawebcrawler/datafiles')
-TARs = list.files('./', pattern='*.tar.gz$', full.names=TRUE)
-decompress = function(filepath) { system(paste('tar xzvf', filepath,  '-C ../tcgawebcrawler/datafiles/')) }
+TARs = list.files('.', pattern='*.tar.gz$', full.names=TRUE)
+decompress = function(filepath) { system(paste('tar xzvf', filepath,  '-C .')) }
 sapply(TARs, decompress)
 
 pattern = 'TCGA-([0-9A-Z]{2})-([0-9A-Z]{4})-(0[0-9]|[1][0-9])([A-Z])-(0[0-9]|[1-9][0-9])([DGHRTWX])-([0-9A-Z]{4})-(\\d{2})'
@@ -32,7 +32,7 @@ for (file in files) {
         dataframe = read.table(file, sep='\t', skip=1, header=TRUE)
         colnames(dataframe)[2] = patient
         #merged = cbind(merged, dataframe[2])
-        merged = merge(merged, dataframe[,1:2], by='Composite Element REF')
+        merged = merge(merged, dataframe[,1:2], by='Composite.Element.REF')
     }
 } 
 merged$sd = apply(merged[,5:ncol(merged)],sd)
