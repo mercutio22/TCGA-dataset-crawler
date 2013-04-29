@@ -35,5 +35,5 @@ for (file in files) {
         merged = merge(merged, dataframe[,1:2], by='Composite.Element.REF')
     }
 } 
-merged$sd = apply(merged[,5:ncol(merged)],sd)
+merged$sd = apply(merged[,5:ncol(merged)], 1 ,sd, na.rm=TRUE)
 
