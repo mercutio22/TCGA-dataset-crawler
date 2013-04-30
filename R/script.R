@@ -10,6 +10,7 @@ TARs = list.files('.', pattern='*.tar.gz$', full.names=TRUE)
 decompress = function(filepath) { system(paste('tar xzvf', filepath,  '-C .')) }
 sapply(TARs, decompress)
 
+#a regular expression to extract the sample patient code
 pattern = 'TCGA-([0-9A-Z]{2})-([0-9A-Z]{4})-(0[0-9]|[1][0-9])([A-Z])-(0[0-9]|[1-9][0-9])([DGHRTWX])-([0-9A-Z]{4})-(\\d{2})'
 #TODO: get each matching group into a manifest file
 #i.e.: r = str_match(file, pattern); institution = r[2]; pcode =r[5]
@@ -23,7 +24,6 @@ for (file in files) {
     colnames(metadata) = mcolumns
     manifest = rbind.data.frame(manifest, metadata)
     if ( length(merged) == 0) {
-        #a regular expression to extract the sample patient code
         dataframe = read.table(file, sep='\t', skip=1, header=TRUE)
         colnames(dataframe)[2] = patient
         merged=dataframe[,c(1,3,4,5,2)]
@@ -35,5 +35,23 @@ for (file in files) {
         merged = merge(merged, dataframe[,1:2], by='Composite.Element.REF')
     }
 } 
-merged$sd = apply(merged[,5:ncol(merged)], 1 ,sd, na.rm=TRUE)
+#TODO: subset all tumor samples and apply sd
+#intersect(names(merged), as.character(subset(manifest, Sample!="01")))
+#setdiff(names(merged), as.character(subset(manifest, Sample!="01")$Basename))
+
+#some garbage collection:
+rm(dataframe)
+rm(files)
+rm(metadata)
+
+unfactor = function(x){
+    levels(x)[x]
+}
+
+SamplesNC = as.numeric(unfactor(manifest$Sample))
+#excludes normals and controls, see https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode
+tumorFilter = SamplesNC < 10
+TumorMethylation = merged[,5:ncol(merged)] ignore the preamble
+TumorMethylation = TumorMethylation[,tumorFilter] 
+TumorMethylation$sd = apply(TumorMethylation[,5:ncol(merged)], 1 ,sd, na.rm=TRUE)
 
