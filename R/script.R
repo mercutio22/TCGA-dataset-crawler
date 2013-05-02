@@ -51,7 +51,7 @@ unfactor = function(x){
 SamplesNC = as.numeric(unfactor(manifest$Sample))
 #excludes normals and controls, see https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode
 tumorFilter = SamplesNC < 10
-TumorMethylation = merged[,5:ncol(merged)] ignore the preamble
+TumorMethylation = merged[,5:ncol(merged)] #ignore the preamble
 TumorMethylation = TumorMethylation[,tumorFilter] 
 TumorMethylation$sd = apply(TumorMethylation[,5:ncol(merged)], 1 ,sd, na.rm=TRUE)
 
