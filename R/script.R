@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+R!/usr/bin/env Rscript
 library(stringr)
 
 #TODO: put this whole section into build.tcga.dataframe function with a 'folder' argument
@@ -6,9 +6,9 @@ library(stringr)
 
 #use gzfile instead?
 setwd('../tcgawebcrawler/datafiles')
-TARs = list.files('.', pattern='*.tar.gz$', full.names=TRUE)
-decompress = function(filepath) { system(paste('tar xzvf', filepath,  '-C .')) }
-sapply(TARs, decompress)
+#TARs = list.files('.', pattern='*.tar.gz$', full.names=TRUE)
+#decompress = function(filepath) { system(paste('tar xzvf', filepath,  '-C .')) }
+#sapply(TARs, decompress)
 
 #a regular expression to extract the sample patient code
 pattern = 'TCGA-([0-9A-Z]{2})-([0-9A-Z]{4})-(0[0-9]|[1][0-9])([A-Z])-(0[0-9]|[1-9][0-9])([DGHRTWX])-([0-9A-Z]{4})-(\\d{2})'
@@ -39,11 +39,6 @@ for (file in files) {
 #intersect(names(merged), as.character(subset(manifest, Sample!="01")))
 #setdiff(names(merged), as.character(subset(manifest, Sample!="01")$Basename))
 
-#some garbage collection:
-rm(dataframe)
-rm(files)
-rm(metadata)
-
 unfactor = function(x){
     levels(x)[x]
 }
@@ -53,5 +48,9 @@ SamplesNC = as.numeric(unfactor(manifest$Sample))
 tumorFilter = SamplesNC < 10
 TumorMethylation = merged[,5:ncol(merged)] #ignore the preamble
 TumorMethylation = TumorMethylation[,tumorFilter] 
-TumorMethylation$sd = apply(TumorMethylation[,5:ncol(merged)], 1 ,sd, na.rm=TRUE)
+TumorMethylation$sd = apply(TumorMethylation, 1 ,sd, na.rm=TRUE)
+
+svg('hist.svg') #starts a new svg plotting device
+hist(TumorMethylation$sd, plot = T)
+dev.off()#closes the plotting device
 
