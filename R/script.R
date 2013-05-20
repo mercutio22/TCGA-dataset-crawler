@@ -1,5 +1,7 @@
-R!/usr/bin/env Rscript
+#!/usr/bin/env Rscript
 library(stringr)
+library(heatmap.plus)
+
 
 #TODO: put this whole section into build.tcga.dataframe function with a 'folder' argument
 #the final dataframe should have 217 columns vs 450k rows
@@ -35,7 +37,6 @@ for (file in files) {
         merged = merge(merged, dataframe[,1:2], by='Composite.Element.REF')
     }
 } 
-#TODO: subset all tumor samples and apply sd
 #intersect(names(merged), as.character(subset(manifest, Sample!="01")))
 #setdiff(names(merged), as.character(subset(manifest, Sample!="01")$Basename))
 
@@ -43,14 +44,42 @@ unfactor = function(x){
     levels(x)[x]
 }
 
-SamplesNC = as.numeric(unfactor(manifest$Sample))
+SamplesNC = as.numeric(unfactor(manifest$Sample)) #make a copy of the manifest file, keeping the original as character.
 #excludes normals and controls, see https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode
-tumorFilter = SamplesNC < 10
 TumorMethylation = merged[,5:ncol(merged)] #ignore the preamble
+TumorMethylation = TumorMethylation[merged[3] != 'X' | merged[3] != 'Y',] #removes chromosome X or Y probes
+tumorFilter = SamplesNC < 10
 TumorMethylation = TumorMethylation[,tumorFilter] 
 TumorMethylation$sd = apply(TumorMethylation, 1 ,sd, na.rm=TRUE)
 
 svg('hist.svg') #starts a new svg plotting device
-hist(TumorMethylation$sd, plot = T)
+histogram <- hist(TumorMethylation$sd, breaks=200)
 dev.off()#closes the plotting device
 
+# based on the 'bimodal histogram' we choose to plot only the most differentiated genes as defines by a cut-off value
+# which by turn is based on the extrapolation of line leading to the leftmost peak. ##Not very clear, ask Houtan.
+# all files saved in tcga.rdata save(file='tcga.rdata',manifest,SamplesNC,SigTumorMethylation,TumorMethylation,pattern)
+cutoff = 0.3 #
+SigTumorMethylation=TumorMethylation[which(TumorMethylation$sd > cutoff),]
+SigTumorMethylation = TumorMethylation[-ncol(TumorMethylation)# removing the sd column] 
+# now for plotting the heatmap part:
+
+svg('heat.png')
+hmp <- heatmap.plus(
+                   as.matrix(SigTumorMethylation),
+                   na.rm=TRUE,
+                   scale='none',
+                   #col=jet.colors(75),
+                   symkey=FALSE,
+                   density.info="none",
+                   trace="none",
+                   Rowv=TRUE,
+                   Colv=NA,
+                   cexRo=1,
+                   cexcol=0.6,
+                   keysize=1,
+                   dendrogram=c("png"),
+                   labRow=NA,
+                   main=paste('TCGA LGG', ncol(SigTumorMethylation), 'samples', nrow(SigTumorMethylation), 'probes'),
+)
+dev.off()
